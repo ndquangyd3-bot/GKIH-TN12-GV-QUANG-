@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập HĐTN - Hướng Nghiệp 12 (Giữa HKI)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Header Navbar -->
+    <header class="glass-card sticky top-0 z-40 shadow-sm border-b border-slate-200/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-800">HĐTN - Hướng Nghiệp 12</h1>
+                    <p class="text-xs text-slate-500 font-medium">Đề cương ôn tập Giữa HKI</p>
+                </div>
+            </div>
+
+            <!-- Right Header Section (Teacher Info & Quiz Status) -->
+            <div class="flex items-center space-x-4">
+                <!-- Teacher Info -->
+                <div class="hidden md:flex items-center space-x-2 text-right bg-white/80 px-3 py-1.5 rounded-xl border border-slate-200/80 shadow-sm">
+                    <div class="w-8 h-8 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-user-tie text-sm"></i>
+                    </div>
+                    <div class="text-xs">
+                        <p class="font-bold text-slate-700">GV: Nguyễn Đình Quang</p>
+                        <p class="text-slate-500 font-medium">THPT Yên Dũng Số 3</p>
+                    </div>
+                </div>
+
+                <!-- Quiz Status Info (Hidden on setup mode) -->
+                <div id="nav-quiz-info" class="hidden flex items-center space-x-3">
+                    <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                        <i class="fa-regular fa-clock text-sky-600"></i>
+                        <span id="timer-display" class="font-mono font-bold text-slate-700">00:00</span>
+                    </div>
+                    <button onclick="confirmExit()" class="text-slate-500 hover:text-rose-600 p-2 rounded-lg hover:bg-rose-50 transition-colors" title="Thoát bài làm">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-center">
+
+        <!-- 1. SETUP SCREEN -->
+        <div id="setup-screen" class="max-w-2xl mx-auto w-full glass-card rounded-2xl shadow-xl p-6 sm:p-8 border border-white/60">
+            <div class="text-center mb-8">
+                <span class="inline-block p-3 rounded-2xl bg-sky-100 text-sky-600 mb-3">
+                    <i class="fa-solid fa-sliders text-2xl"></i>
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800">Thiết Lập Bài Luyện Tập</h2>
+                <p class="text-slate-500 mt-2 text-sm sm:text-base">Tùy chỉnh số lượng câu hỏi và chế độ hiển thị phù hợp với bạn</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Select Question Count -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        <i class="fa-solid fa-list-ol text-sky-500 mr-2"></i>Số lượng câu hỏi:
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <button type="button" onclick="selectQuestionCount(10)" class="count-opt border-2 border-slate-200 rounded-xl p-3 text-center font-semibold hover:border-sky-500 transition-all bg-white">10 Câu</button>
+                        <button type="button" onclick="selectQuestionCount(20)" class="count-opt border-2 border-slate-200 rounded-xl p-3 text-center font-semibold hover:border-sky-500 transition-all bg-white">20 Câu</button>
+                        <button type="button" onclick="selectQuestionCount(30)" class="count-opt border-2 border-slate-200 rounded-xl p-3 text-center font-semibold hover:border-sky-500 transition-all bg-white">30 Câu</button>
+                        <button type="button" onclick="selectQuestionCount(60)" class="count-opt border-2 border-sky-500 bg-sky-50 text-sky-700 rounded-xl p-3 text-center font-semibold transition-all">Tất cả (60)</button>
+                    </div>
+                </div>
+
+                <!-- Select Mode -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">
+                        <i class="fa-solid fa-eye text-sky-500 mr-2"></i>Chế độ làm bài:
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="mode-opt border-2 border-sky-500 bg-sky-50/50 rounded-xl p-4 flex items-start space-x-3 cursor-pointer hover:bg-sky-50 transition-all">
+                            <input type="radio" name="mode" value="instant" checked class="mt-1 text-sky-600 focus:ring-sky-500">
+                            <div>
+                                <div class="font-semibold text-slate-800 text-sm">Xem đáp án ngay</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Biết ngay đúng/sai và lời giải thích sau khi chọn đáp án.</div>
+                            </div>
+                        </label>
+                        <label class="mode-opt border-2 border-slate-200 rounded-xl p-4 flex items-start space-x-3 cursor-pointer hover:bg-slate-50 transition-all">
+                            <input type="radio" name="mode" value="end" class="mt-1 text-sky-600 focus:ring-sky-500">
+                            <div>
+                                <div class="font-semibold text-slate-800 text-sm">Chấm điểm khi nộp</div>
+                                <div class="text-xs text-slate-500 mt-0.5">Giống thi thật, xem toàn bộ kết quả sau khi nộp bài.</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Shuffling Option -->
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-shuffle text-slate-500 text-lg"></i>
+                        <span class="text-sm font-semibold text-slate-700">Trộn ngẫu nhiên câu hỏi</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="shuffle-toggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
+                    </label>
+                </div>
+
+                <!-- Start Button -->
+                <button onclick="startQuiz()" class="w-full py-4 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg shadow-sky-500/25 transition-all transform active:scale-[0.99] flex items-center justify-center space-x-2">
+                    <span>Bắt Đầu Làm Bài</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. QUIZ PLAYING SCREEN -->
+        <div id="quiz-screen" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            
+            <!-- Left/Main Question Area (3 Cols) -->
+            <div class="lg:col-span-3 space-y-4">
+                
+                <!-- Progress Header -->
+                <div class="glass-card rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+                        <span class="font-bold text-slate-700 text-sm sm:text-base">
+                            Câu hỏi <span id="current-q-num" class="text-sky-600 text-lg">1</span>/<span id="total-q-num">60</span>
+                        </span>
+                        <button onclick="toggleBookmark()" id="bookmark-btn" class="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-300 transition-colors flex items-center space-x-2 text-sm">
+                            <i class="fa-regular fa-bookmark" id="bookmark-icon"></i>
+                            <span id="bookmark-text">Đánh dấu</span>
+                        </button>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full sm:max-w-xs bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-gradient-to-r from-sky-500 to-indigo-600 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-md border border-white/80 min-h-[380px] flex flex-col justify-between">
+                    <div>
+                        <h3 id="question-text" class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed mb-6">
+                            Đang tải câu hỏi...
+                        </h3>
+
+                        <!-- Options List -->
+                        <div id="options-container" class="space-y-3">
+                            <!-- Options injected dynamically -->
+                        </div>
+
+                        <!-- Instant Feedback Box (Only for instant mode) -->
+                        <div id="instant-feedback" class="hidden mt-6 p-4 rounded-xl border transition-all text-sm">
+                            <div class="font-bold flex items-center space-x-2 mb-1" id="feedback-title">
+                                <!-- Status icon & text -->
+                            </div>
+                            <p class="text-slate-600" id="feedback-detail"></p>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex items-center justify-between pt-6 border-t border-slate-100 mt-6">
+                        <button id="prev-btn" onclick="prevQuestion()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center space-x-2">
+                            <i class="fa-solid fa-chevron-left text-sm"></i>
+                            <span>Câu trước</span>
+                        </button>
+
+                        <button id="next-btn" onclick="nextQuestion()" class="px-6 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-md shadow-sky-600/20 transition-all flex items-center space-x-2">
+                            <span>Câu sau</span>
+                            <i class="fa-solid fa-chevron-right text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Question Grid Panel (1 Col) -->
+            <div class="lg:col-span-1 glass-card rounded-2xl p-5 shadow-sm border border-white/80 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-grid-2 text-sky-500"></i>
+                        <span>Danh sách câu hỏi</span>
+                    </h4>
+                    <span class="text-xs bg-sky-100 text-sky-700 font-semibold px-2 py-0.5 rounded-full" id="answered-count">0/60</span>
+                </div>
+
+                <!-- Grid Buttons -->
+                <div id="question-grid" class="grid grid-cols-5 gap-2 max-h-[320px] lg:max-h-[420px] overflow-y-auto custom-scrollbar p-1">
+                    <!-- Question numbers injected dynamically -->
+                </div>
+
+                <!-- Legend -->
+                <div class="pt-3 border-t border-slate-200 text-xs space-y-2 text-slate-600">
+                    <div class="flex items-center justify-between">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-md bg-sky-600 inline-block mr-2"></span> Đang xem</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-md bg-emerald-500 inline-block mr-2"></span> Đã chọn</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-md bg-amber-400 inline-block mr-2"></span> Đánh dấu</span>
+                        <span class="flex items-center"><span class="w-3 h-3 rounded-md bg-slate-200 inline-block mr-2"></span> Chưa làm</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button onclick="submitQuizConfirm()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center space-x-2 mt-4">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Nộp Bài Thi</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. RESULT SCREEN -->
+        <div id="result-screen" class="hidden max-w-4xl mx-auto w-full space-y-6">
+            
+            <!-- Result Overview Card -->
+            <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-xl text-center border border-white relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-40 h-40 bg-sky-400/10 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-indigo-400/10 rounded-full blur-2xl"></div>
+
+                <div class="inline-flex p-4 rounded-full bg-slate-100 mb-4 shadow-inner">
+                    <i id="result-badge-icon" class="fa-solid fa-trophy text-4xl text-amber-500"></i>
+                </div>
+
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800" id="result-rating">Xuất sắc!</h2>
+                <p class="text-slate-500 mt-1" id="result-subtext">Bạn đã hoàn thành xuất sắc bài thi trắc nghiệm.</p>
+
+                <!-- Score Badge & Details -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-8 max-w-2xl mx-auto">
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Điểm số</span>
+                        <span class="text-3xl font-extrabold text-sky-600 mt-1 block" id="final-score">9.5</span>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Số câu đúng</span>
+                        <span class="text-3xl font-extrabold text-emerald-600 mt-1 block" id="correct-count">57/60</span>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Độ chính xác</span>
+                        <span class="text-3xl font-extrabold text-indigo-600 mt-1 block" id="accuracy-percent">95%</span>
+                    </div>
+                    <div class="bg-white/80 p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Thời gian</span>
+                        <span class="text-3xl font-extrabold text-amber-600 mt-1 block" id="time-taken">12:45</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="restartQuiz()" class="w-full sm:w-auto px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow-lg shadow-sky-600/20 transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Làm Bài Khác</span>
+                    </button>
+                    <button onclick="scrollToReview()" class="w-full sm:w-auto px-6 py-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Xem Chi Tiết Lời Giải</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Detailed Answer Review Section -->
+            <div id="review-section" class="glass-card rounded-2xl p-6 sm:p-8 shadow-md border border-white/80 space-y-6">
+                <h3 class="text-xl font-bold text-slate-800 pb-4 border-b border-slate-200 flex items-center space-x-2">
+                    <i class="fa-solid fa-list-check text-sky-600"></i>
+                    <span>Chi Tiết Lời Giải & Đáp Án</span>
+                </h3>
+
+                <div id="review-list" class="space-y-6">
+                    <!-- Reviewed questions injected dynamically -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Modal Popup -->
+    <div id="custom-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 transform transition-all scale-100">
+            <h3 id="modal-title" class="text-xl font-bold text-slate-800">Xác nhận</h3>
+            <p id="modal-msg" class="text-slate-600 text-sm">Bạn có chắc chắn muốn nộp bài thi?</p>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button id="modal-cancel-btn" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm">Hủy</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold text-sm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // 60 Raw Questions Database
+        const RAW_QUESTIONS = [
+            { id: 1, q: "Đâu là cách kiểm soát mối quan hệ với các bạn qua mạng xã hội?", options: ["Chấp nhận lời mời kết bạn của tất cả mọi người để mở rộng mối quan hệ.", "Chia sẻ thông tin cá nhân để nhanh chóng tạo sự thân thiết với các bạn.", "Duy trì mọi mối quan hệ đã thiết lập, kể cả khi cảm thấy không thoải mái.", "Có lập trường vững vàng khi thiết lập và phát triển mối quan hệ với các bạn."], answer: 3 },
+            { id: 2, q: "Hành vi nào thể hiện sự kính trọng đối với thầy cô?", options: ["Lễ phép, lắng nghe và chủ động trao đổi với thầy cô.", "Chỉ liên hệ với thầy cô khi cần nâng điểm.", "Ngắt lời thầy cô khi đang nói.", "Không thực hiện nhiệm vụ học tập được giao."], answer: 0 },
+            { id: 3, q: "Để giữ gìn tình bạn tốt đẹp, học sinh nên làm gì?", options: ["Chỉ chơi với những bạn học giỏi.", "Yêu cầu bạn làm thay nhiệm vụ của mình.", "Tránh giao tiếp với bạn khác lớp.", "Quan tâm, chia sẻ và giúp đỡ bạn khi gặp khó khăn."], answer: 3 },
+            { id: 4, q: "Khi hợp tác trong nhóm, các thành viên cần:", options: ["Làm việc riêng, không trao đổi.", "Giao tiếp cởi mở, trung thực và tôn trọng nhau.", "Chỉ nghe theo ý kiến của trưởng nhóm.", "Che giấu những khó khăn gặp phải."], answer: 1 },
+            { id: 5, q: "Việc phân công nhiệm vụ trong nhóm hợp lí nhất nên căn cứ vào:", options: ["Vị trí ngồi của từng thành viên.", "Thứ tự tên trong danh sách lớp.", "Năng lực, sở trường và điều kiện của từng thành viên.", "Ý kiến của một người duy nhất."], answer: 2 },
+            { id: 6, q: "Khi xảy ra mâu thuẫn với bạn bè, cách giải quyết phù hợp là:", options: ["Tranh cãi đến khi mình thắng.", "Kể chuyện mâu thuẫn cho nhiều người.", "Ngừng giao tiếp và không tìm cách giải quyết.", "Bình tĩnh lắng nghe, trao đổi và cùng tìm giải pháp."], answer: 3 },
+            { id: 7, q: "Khi nhận được lời mời kết bạn từ người lạ trên mạng xã hội, em nên:", options: ["Thận trọng tìm hiểu và không vội chia sẻ thông tin cá nhân.", "Chấp nhận ngay tất cả lời mời.", "Cung cấp địa chỉ nhà để tạo lòng tin.", "Tin tưởng tuyệt đối người chưa quen biết."], answer: 0 },
+            { id: 8, q: "Thông tin nào cần được bảo vệ khi sử dụng mạng xã hội?", options: ["Một bài học đã được công khai.", "Lời chúc mừng sinh nhật bạn bè.", "Thông tin về hoạt động tập thể đã công khai.", "Mật khẩu, địa chỉ nhà và thông tin cá nhân quan trọng."], answer: 3 },
+            { id: 9, q: "Khi gặp hành vi quấy rối trên mạng xã hội, học sinh nên:", options: ["Trả đũa bằng những lời xúc phạm.", "Lưu bằng chứng khi cần thiết, báo cáo vi phạm và tìm sự hỗ trợ đáng tin cậy.", "Công khai thông tin cá nhân của người đó để trả thù.", "Tiếp tục tranh cãi để giành phần thắng."], answer: 1 },
+            { id: 10, q: "Nội dung nào cần có trong kế hoạch tổ chức hoạt động xây dựng truyền thống nhà trường?", options: ["Chỉ có tên hoạt động.", "Chỉ có kinh phí dự kiến.", "Mục tiêu, nội dung, thời gian, người thực hiện và phương tiện.", "Chỉ có tên người phụ trách."], answer: 2 },
+            { id: 11, q: "Vì sao cần lắng nghe và tôn trọng ý kiến của nhau khi hợp tác?", options: ["Giúp tạo môi trường cởi mở, phát huy ý kiến và nâng cao hiệu quả công việc.", "Để tất cả thành viên phải đồng ý với trưởng nhóm.", "Để không cần phân công nhiệm vụ.", "Để một người quyết định thay cả nhóm."], answer: 0 },
+            { id: 12, q: "Việc hỗ trợ và động viên nhau trong nhóm có tác dụng chủ yếu là:", options: ["Làm giảm trách nhiệm của các thành viên.", "Thay thế hoàn toàn việc phân công công việc.", "Giúp trưởng nhóm không phải làm việc.", "Tạo động lực để các thành viên hoàn thành tốt nhiệm vụ."], answer: 3 },
+            { id: 13, q: "Vì sao mạng xã hội có thể giúp mở rộng mối quan hệ bạn bè?", options: ["Vì tất cả người dùng đều đáng tin cậy.", "Vì có thể kết nối, giao lưu với nhiều người ở những địa điểm khác nhau.", "Vì giao tiếp trên mạng không có rủi ro.", "Vì mọi thông tin trên mạng đều chính xác."], answer: 1 },
+            { id: 14, q: "Khi đọc một bài viết có thông tin chưa rõ độ tin cậy, em nên:", options: ["Tin ngay nếu bài viết có nhiều lượt thích.", "Chia sẻ ngay cho bạn bè.", "Kiểm tra nguồn tin, đối chiếu thông tin và đánh giá bằng chứng.", "Tin theo ý kiến của người bình luận đầu tiên."], answer: 2 },
+            { id: 15, q: "Hành vi nào thể hiện sự tôn trọng người khác trên mạng xã hội?", options: ["Chế giễu người có ý kiến khác mình.", "Chia sẻ ảnh riêng tư của người khác khi chưa được đồng ý.", "Dùng lời lẽ xúc phạm khi tranh luận.", "Tôn trọng ý kiến khác biệt và sử dụng ngôn ngữ phù hợp."], answer: 3 },
+            { id: 16, q: "Bạn A nhận lời mời kết bạn từ một người lạ. Người này yêu cầu A cung cấp địa chỉ nhà. A nên làm gì?", options: ["Không cung cấp địa chỉ, thận trọng xác minh và bảo vệ thông tin cá nhân.", "Gửi địa chỉ để thể hiện sự tin tưởng.", "Gửi thêm số điện thoại cá nhân.", "Công khai thông tin của mình trên trang cá nhân."], answer: 0 },
+            { id: 17, q: "Một người bạn nhắn tin nhờ chuyển tiền gấp qua mạng xã hội. Cách xử lí phù hợp nhất là:", options: ["Chuyển tiền ngay vì đó là bạn thân.", "Gửi thông tin tài khoản ngân hàng cho người đó.", "Gọi điện hoặc xác minh bằng kênh khác trước khi chuyển tiền nếu em thật sự muốn giúp bạn.", "Đăng thông tin giao dịch lên mạng xã hội."], answer: 2 },
+            { id: 18, q: "Hai thành viên trong nhóm bất đồng về cách thực hiện nhiệm vụ. Em nên:", options: ["Bênh vực người thân thiết với mình.", "Lắng nghe hai bên, phân tích các phương án và thống nhất giải pháp chung.", "Đưa cuộc tranh luận lên mạng xã hội.", "Yêu cầu một thành viên rời khỏi nhóm."], answer: 1 },
+            { id: 19, q: "Bạn cùng lớp gặp khó khăn trong học tập và có xu hướng thu mình. Em nên:", options: ["Phớt lờ vì đó là việc riêng của bạn.", "Đăng hoàn cảnh của bạn lên mạng.", "Ép bạn chia sẻ trước cả lớp.", "Chủ động quan tâm, động viên và hỗ trợ bạn phù hợp."], answer: 3 },
+            { id: 20, q: "Một thành viên chưa hoàn thành nhiệm vụ trong hoạt động tập thể. Nhóm nên:", options: ["Trao đổi để tìm nguyên nhân, hỗ trợ và điều chỉnh phân công khi cần.", "Phê bình bạn trước toàn trường.", "Loại bạn khỏi nhóm ngay lập tức.", "Bỏ toàn bộ nhiệm vụ được giao."], answer: 0 },
+            { id: 21, q: "Khi thầy cô chuyển công tác sang trường khác, hành động nào thể hiện việc giữ gìn mối quan hệ tốt đẹp?", options: ["Không liên hệ vì thầy cô đã chuyển trường.", "Đăng thông tin cá nhân của thầy cô lên mạng.", "Gửi lời cảm ơn, chia sẻ kỉ niệm và giữ liên lạc phù hợp.", "Chỉ tặng quà mà không cần thể hiện lòng biết ơn."], answer: 2 },
+            { id: 22, q: "Sau một cuộc tranh luận trên mạng, em nhận ra mình đã sử dụng lời lẽ chưa phù hợp. Em nên:", options: ["Tiếp tục tranh luận để chứng minh mình đúng.", "Điều chỉnh cách giao tiếp, xin lỗi khi cần và tôn trọng người khác.", "Kêu gọi bạn bè công kích người đối thoại.", "Tiếp tục đăng bình luận xúc phạm."], answer: 1 },
+            { id: 23, q: "Một nhóm chuẩn bị hoạt động nhưng mục tiêu chưa rõ ràng, nhiệm vụ chồng chéo. Giải pháp toàn diện nhất là:", options: ["Để từng người tự thực hiện theo ý mình.", "Giao tất cả nhiệm vụ cho trưởng nhóm.", "Tăng số cuộc họp nhưng không phân công cụ thể.", "Thống nhất mục tiêu, phân công theo năng lực, thiết lập cách trao đổi và tiêu chí đánh giá."], answer: 3 },
+            { id: 24, q: "Một học sinh đăng ảnh của bạn lên mạng khi chưa được bạn đồng ý. Cách ứng xử phù hợp nhất là:", options: ["Tôn trọng quyền riêng tư, gỡ ảnh và trao đổi để tránh lặp lại.", "Tiếp tục chia sẻ vì cho rằng mình có ý tốt.", "Yêu cầu mọi người chia sẻ lại bức ảnh.", "Cho rằng đăng ảnh lên mạng thì không cần xin phép."], answer: 0 },
+            { id: 25, q: "Tin nhắn từ một tài khoản yêu cầu em nhấn vào đường link và cung cấp mật khẩu để xác minh tài khoản. Em nên:", options: ["Gửi mật khẩu vì tài khoản có tên người quen.", "Nhấn vào đường link trong tin nhắn để kiểm tra tài khoản.", "Không cung cấp mật khẩu, xác minh qua kênh chính thức và báo cáo dấu hiệu lừa đảo.", "Chuyển tiếp tin nhắn cho nhiều người mà không cảnh báo."], answer: 2 },
+            { id: 26, q: "Khi đánh giá hoạt động xây dựng truyền thống nhà trường, nhóm cần quan tâm đến:", options: ["Chỉ số lượng người tham gia.", "Chỉ ý kiến của trưởng nhóm.", "Chỉ thời gian hoàn thành.", "Chất lượng sản phẩm, mức độ hợp tác và tính công bằng trong đánh giá."], answer: 3 },
+            { id: 27, q: "Một nhóm muốn tổ chức hoạt động phát huy truyền thống nhà trường nhưng nguồn lực hạn chế. Nhóm nên:", options: ["Xác định mục tiêu khả thi, chọn nội dung phù hợp nguồn lực và phân công rõ ràng.", "Đặt mục tiêu thật lớn mà không cần tính toán.", "Hủy hoạt động ngay khi thấy thiếu kinh phí.", "Chỉ giao nhiệm vụ cho thành viên có kinh nghiệm."], answer: 0 },
+            { id: 28, q: "Muốn xây dựng mối quan hệ tốt đẹp với thầy cô, học sinh cần:", options: ["Chỉ đạt điểm cao trong các bài kiểm tra.", "Chỉ tham gia các hoạt động văn nghệ.", "Kính trọng thầy cô, hoàn thành nhiệm vụ và chủ động trao đổi khi cần.", "Tránh trao đổi với thầy cô về khó khăn học tập."], answer: 2 },
+            { id: 29, q: "Khi bạn có quan điểm khác mình, cách ứng xử phù hợp nhất là:", options: ["Ngắt lời để bảo vệ ý kiến của mình.", "Lắng nghe, trao đổi có lí lẽ và tôn trọng sự khác biệt.", "Chế giễu quan điểm của bạn.", "Chấm dứt tình bạn ngay lập tức."], answer: 1 },
+            { id: 30, q: "Sau hoạt động tập thể, nhóm muốn cải thiện hiệu quả trong lần tổ chức tiếp theo. Nhóm nên:", options: ["Chỉ khen ngợi trưởng nhóm.", "Bỏ qua các ý kiến phản hồi.", "Chỉ xem xét số người tham gia.", "Đối chiếu mục tiêu với kết quả, đánh giá sự phối hợp và rút kinh nghiệm."], answer: 3 },
+            { id: 31, q: "Biểu hiện nào sau đây thể hiện sự trưởng thành về mặt xã hội?", options: ["Chỉ quan tâm đến lợi ích của bản thân.", "Biết giao tiếp, hợp tác và thực hiện trách nhiệm với cộng đồng.", "Luôn phụ thuộc vào quyết định của người khác.", "Tránh tham gia các hoạt động tập thể."], answer: 1 },
+            { id: 32, q: "Thích nghi với sự thay đổi trong cuộc sống được hiểu là:", options: ["Từ chối mọi thay đổi để giữ nguyên thói quen.", "Luôn làm theo ý kiến của người khác.", "Tránh đối mặt với những hoàn cảnh mới.", "Điều chỉnh suy nghĩ, cảm xúc và hành vi phù hợp với hoàn cảnh mới."], answer: 3 },
+            { id: 33, q: "Phẩm chất ý chí của cá nhân được thể hiện rõ nhất qua hành vi nào?", options: ["Kiên trì vượt khó và quyết tâm thực hiện mục tiêu đã đặt ra.", "Dễ dàng bỏ cuộc khi gặp trở ngại.", "Thực hiện công việc theo cảm hứng nhất thời.", "Phụ thuộc hoàn toàn vào sự thúc giục của người khác."], answer: 0 },
+            { id: 34, q: "Hành vi nào sau đây không thể hiện ý chí?", options: ["Kiên trì luyện tập để tiến bộ.", "Chủ động tìm cách vượt qua khó khăn.", "Bỏ cuộc ngay khi gặp thất bại đầu tiên.", "Tự giác thực hiện kế hoạch đã đề ra."], answer: 2 },
+            { id: 35, q: "Khi bước vào môi trường học tập mới, học sinh nên làm gì để thích nghi?", options: ["Từ chối làm quen với bạn mới.", "Giữ nguyên mọi cách học dù không còn phù hợp.", "Chờ người khác giải quyết mọi khó khăn.", "Tìm hiểu môi trường mới, điều chỉnh cách học và chủ động hòa nhập."], answer: 3 },
+            { id: 36, q: "Khi gặp thất bại trong học tập, biểu hiện nào cho thấy sự trưởng thành?", options: ["Đổ lỗi hoàn toàn cho người khác.", "Nhìn nhận nguyên nhân, rút kinh nghiệm và xây dựng kế hoạch cải thiện.", "Che giấu thất bại và không tìm cách khắc phục.", "Bỏ mục tiêu học tập đã đặt ra."], answer: 1 },
+            { id: 37, q: "Tư duy độc lập là khả năng:", options: ["Luôn phản đối ý kiến của số đông.", "Không cần tham khảo bất cứ nguồn thông tin nào.", "Tự suy nghĩ, phân tích và đưa ra nhận định dựa trên lí lẽ, bằng chứng.", "Luôn cho rằng ý kiến của mình đúng."], answer: 2 },
+            { id: 38, q: "Biểu hiện nào sau đây không thể hiện tư duy độc lập?", options: ["Chủ động tìm kiếm thông tin từ nhiều nguồn.", "Phân tích ưu điểm và hạn chế của các phương án.", "Đưa ra nhận định dựa trên bằng chứng.", "Tin hoàn toàn vào ý kiến của người khác mà không suy xét."], answer: 3 },
+            { id: 39, q: "Vì sao mỗi người cần rèn luyện ý chí?", options: ["Để kiên trì theo đuổi mục tiêu, vượt qua khó khăn và hoàn thiện bản thân.", "Để không bao giờ phải thay đổi kế hoạch.", "Để tránh mọi thử thách trong cuộc sống.", "Để buộc mọi người thực hiện theo ý mình."], answer: 0 },
+            { id: 40, q: "Khi có nhiều nhiệm vụ cần hoàn thành cùng lúc, cách làm phù hợp nhất là:", options: ["Thực hiện ngẫu nhiên, không cần sắp xếp.", "Chỉ làm nhiệm vụ mình yêu thích.", "Xác định mức độ ưu tiên, lập kế hoạch và phân bổ thời gian hợp lí.", "Trì hoãn tất cả nhiệm vụ đến sát hạn."], answer: 2 },
+            { id: 41, q: "Sự thay đổi nào sau đây có thể xảy ra trong quá trình trưởng thành?", options: ["Chỉ thay đổi về chiều cao và cân nặng.", "Thay đổi về nhận thức, cảm xúc, hành vi và các mối quan hệ xã hội.", "Không có thay đổi về cách suy nghĩ.", "Chỉ thay đổi khi có người khác yêu cầu."], answer: 1 },
+            { id: 42, q: "Khi phải thích nghi với một hoàn cảnh không như mong muốn, em nên:", options: ["Phủ nhận hoàn cảnh và không hành động.", "Đổ lỗi cho những người xung quanh.", "Chờ hoàn cảnh tự thay đổi.", "Bình tĩnh chấp nhận thực tế, xác định vấn đề và tìm cách ứng phó phù hợp."], answer: 3 },
+            { id: 43, q: "Điều gì giúp một người nâng cao khả năng thích nghi?", options: ["Sẵn sàng học hỏi, linh hoạt điều chỉnh và chủ động giải quyết vấn đề.", "Luôn giữ nguyên quan điểm dù hoàn cảnh thay đổi.", "Tránh tiếp xúc với môi trường mới.", "Phụ thuộc vào quyết định của người khác."], answer: 0 },
+            { id: 44, q: "Khi đặt mục tiêu cá nhân, điều nào sau đây là cần thiết?", options: ["Đặt mục tiêu vượt quá khả năng và không cần kế hoạch.", "Chỉ đặt mục tiêu theo mong muốn của bạn bè.", "Xác định mục tiêu cụ thể, phù hợp và xây dựng kế hoạch thực hiện.", "Không cần kiểm tra tiến độ thực hiện."], answer: 2 },
+            { id: 45, q: "Một học sinh đặt mục tiêu cải thiện kết quả môn Toán nhưng liên tục gặp bài khó. Cách ứng xử thể hiện ý chí tốt nhất là:", options: ["Bỏ học môn Toán vì thấy khó.", "Chỉ làm những bài đã biết cách giải.", "Đổ lỗi cho đề bài quá khó.", "Kiên trì luyện tập, hỏi thầy cô, bạn bè và điều chỉnh phương pháp học."], answer: 3 },
+            { id: 46, q: "Khi các bạn đều lựa chọn một phương án nhưng em nhận thấy phương án đó có hạn chế, em nên:", options: ["Đồng ý ngay để không khác biệt với tập thể.", "Trình bày lí lẽ, bằng chứng và lắng nghe ý kiến phản hồi trước khi quyết định.", "Phản đối tất cả ý kiến của các bạn.", "Không tham gia thảo luận."], answer: 1 },
+            { id: 47, q: "Một học sinh thường xuyên trì hoãn công việc và chỉ làm khi có người nhắc nhở. Biện pháp phù hợp nhất là:", options: ["Chờ bố mẹ hoặc thầy cô nhắc nhở nhiều hơn.", "Chỉ thực hiện công việc khi có phần thưởng.", "Lập thời gian biểu, chia nhỏ nhiệm vụ và tự theo dõi tiến độ thực hiện.", "Không thực hiện mục tiêu đã đặt ra."], answer: 2 },
+            { id: 48, q: "Khi nhận được lời khuyên từ người khác, người có tư duy độc lập nên:", options: ["Làm theo ngay mà không cần suy nghĩ.", "Bác bỏ mọi lời khuyên.", "Chỉ nghe lời khuyên của người thân.", "Lắng nghe, phân tích tính hợp lí và lựa chọn cách thực hiện phù hợp."], answer: 3 },
+            { id: 49, q: "Một học sinh chuyển đến trường mới, cảm thấy khó hòa nhập và kết quả học tập giảm sút. Cách giải quyết phù hợp nhất là:", options: ["Chủ động làm quen với bạn bè, trao đổi với giáo viên và điều chỉnh phương pháp học tập.", "Thu mình, tránh giao tiếp và không nhờ ai giúp đỡ.", "Cho rằng môi trường mới là nguyên nhân duy nhất của mọi khó khăn.", "Từ chối tham gia các hoạt động của lớp."], answer: 0 },
+            { id: 50, q: "Một học sinh muốn lựa chọn ngành nghề tương lai nhưng gia đình và bạn bè đưa ra nhiều ý kiến khác nhau. Để thể hiện sự trưởng thành và tư duy độc lập, học sinh nên:", options: ["Chọn ngành theo số đông bạn bè.", "Chọn ngay theo mong muốn của gia đình mà không tìm hiểu.", "Từ chối mọi lời khuyên và quyết định theo cảm xúc nhất thời.", "Tìm hiểu năng lực, sở thích, điều kiện thực tế; tham khảo ý kiến và tự phân tích trước khi quyết định."], answer: 3 },
+            { id: 51, q: "Biểu hiện nào sau đây đúng khi duy trì mối quan hệ tốt đẹp với bạn bè?", options: ["Luôn nhượng bộ và không bảo vệ ý kiến của mình.", "Thường xuyên liên lạc và chia sẻ với nhau.", "Tránh xa khi có xung đột.", "Chỉ gặp gỡ khi cần sự giúp đỡ."], answer: 1 },
+            { id: 52, q: "Em không tán thành ý kiến nào sau đây về tình bạn?", options: ["Biết phê bình nhau trong mọi trường hợp.", "Tình bạn trong sáng, lành mạnh không thể có từ một phía.", "Bạn bè phải biết bảo vệ nhau trong mọi trường hợp.", "Có thể có tình bạn trong sáng, lành mạnh giữa hai người khác giới."], answer: 2 },
+            { id: 53, q: "Thực hành cách giải quyết tình huống: Hải là một bạn nhút nhát, ngại giao tiếp. Bạn thường xuyên bị các bạn trong lớp trêu chọc và có những lời lẽ thiếu tôn trọng đối với bạn.", options: ["Em sẽ thẳng thắn góp ý với các bạn trong lớp và chỉ cho các bạn biết đó là hành vi bắt nạt về mặt thể chất.", "Em sẽ thẳng thắn góp ý với các bạn trong lớp và chỉ cho các bạn biết đó là hành vi bắt nạt về mặt tinh thần.", "Không quan tâm vì đó không phải việc của mình.", "Em sẽ thẳng thắn góp ý với các bạn trong lớp và chỉ cho các bạn biết đó là hành vi sẽ bị xử lý hình sự."], answer: 1 },
+            { id: 54, q: "Thực hành giải quyết tình huống: Bố mẹ Lan mất sớm nên bạn ở cùng với bà. Vì gia đình khó khăn nên bạn thường xuyên sử dụng lại các đồ dùng đã cũ. Thấy vậy một số bạn trong lớp coi thường Lan, thường xuyên trêu chọc và cô lập bạn.", options: ["Lan nên chia sẻ với thầy cô để tìm được sự trợ giúp.", "Lan nên lập tức đáp trả lại các bạn khi bị trêu chọc, cô lập.", "Lan nên im lặng để mọi việc qua đi và giữ trong lòng.", "Lan nên nghỉ học để tránh gặp các bạn thường xuyên trêu chọc mình."], answer: 0 },
+            { id: 55, q: "Câu tục ngữ 'Gần mực thì đen, gần đèn thì rạng' mang ý nghĩa gì?", options: ["Không nên chơi với bất kì ai.", "Cần lựa chọn người bạn tốt để chơi cùng.", "Chỉ nên chơi với người quen biết.", "Nên chơi với tất cả mọi người."], answer: 1 },
+            { id: 56, q: "Đâu không phải là mục tiêu của hoạt động lao động công ích ở trường?", options: ["Giúp học sinh hoàn thành công việc được giao mà không cần quan tâm đến lợi ích chung của tập thể.", "Rèn luyện kĩ năng tổ chức và tham gia lao động.", "Phát triển kĩ năng hợp tác.", "Bồi dưỡng tình yêu lao động."], answer: 0 },
+            { id: 57, q: "Mục tiêu chính của hoạt động chăm sóc cây xanh ở vườn trường là:", options: ["Phát triển các phẩm chất: trách nhiệm, chăm chỉ, lòng nhân ái, sự tự tin,…", "Góp phần xây dựng và phát huy truyền thống nhà trường.", "Tạo cảnh quan xanh, sạch, đẹp trong nhà trường.", "Rèn luyện các kĩ năng hợp tác, quản lí thời gian,…"], answer: 2 },
+            { id: 58, q: "Khi giới thiệu sản phẩm về truyền thống nhà trường, em cần lưu ý điều gì?", options: ["Sử dụng ngôn ngữ hình thể.", "Thể hiện sự tự hào, trình bày rõ ràng, mạch lạc.", "Hạn chế tối đa các thông tin viết ra giấy.", "Tương tác với các bạn phía dưới lớp bằng ánh mắt."], answer: 1 },
+            { id: 59, q: "Điền vào dấu ba chấm “…”: “Ở trường học, các em không chỉ cần nỗ lực phấn đấu trong học tập mà còn cần tham gia các hoạt động lao động công ích. Đó là cách chúng ta thể hiện……(1) …… và ……(2) …… của mình đối với nhà trường”.", options: ["(1). nghĩa vụ; (2). trách nhiệm.", "(1). trách nhiệm; (2). niềm tự hào.", "(1). tình yêu; (2). lòng biết ơn.", "(1). công lao; (2). đóng góp."], answer: 0 },
+            { id: 60, q: "Đâu không phải là địa điểm phù hợp để trưng bày và giới thiệu sản phẩm về truyền thống nhà trường?", options: ["Phòng truyền thống.", "Hành lang.", "Kho chứa dụng cụ lao động.", "Trang mạng xã hội của nhà trường."], answer: 2 }
+        ];
+
+        // State variables
+        let selectedCount = 60;
+        let activeQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = {}; // { qIndex: selectedOptionIndex }
+        let bookmarked = {};  // { qIndex: boolean }
+        let quizMode = 'instant'; // 'instant' or 'end'
+        let timerInterval = null;
+        let secondsElapsed = 0;
+
+        // UI Handlers for Setup
+        function selectQuestionCount(count) {
+            selectedCount = count;
+            document.querySelectorAll('.count-opt').forEach(btn => {
+                if (btn.innerText.includes(count + ' Câu') || (count === 60 && btn.innerText.includes('Tất cả'))) {
+                    btn.className = "count-opt border-2 border-sky-500 bg-sky-50 text-sky-700 rounded-xl p-3 text-center font-semibold transition-all";
+                } else {
+                    btn.className = "count-opt border-2 border-slate-200 rounded-xl p-3 text-center font-semibold hover:border-sky-500 transition-all bg-white";
+                }
+            });
+        }
+
+        function startQuiz() {
+            // Get Mode
+            const modeVal = document.querySelector('input[name="mode"]:checked').value;
+            quizMode = modeVal;
+
+            // Get Shuffle
+            const shouldShuffle = document.getElementById('shuffle-toggle').checked;
+
+            let pool = [...RAW_QUESTIONS];
+            if (shouldShuffle) {
+                pool.sort(() => Math.random() - 0.5);
+            }
+            activeQuestions = pool.slice(0, selectedCount);
+
+            // Reset States
+            currentIndex = 0;
+            userAnswers = {};
+            bookmarked = {};
+            secondsElapsed = 0;
+
+            // Update UI Screens
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('nav-quiz-info').classList.remove('hidden');
+
+            document.getElementById('total-q-num').innerText = activeQuestions.length;
+
+            // Start Timer
+            startTimer();
+
+            // Build Question Grid
+            renderQuestionGrid();
+
+            // Load First Question
+            loadQuestion(0);
+        }
+
+        // Timer Function
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+                document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        // Render Right Side Navigation Grid
+        function renderQuestionGrid() {
+            const grid = document.getElementById('question-grid');
+            grid.innerHTML = '';
+
+            activeQuestions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.id = `grid-btn-${idx}`;
+                btn.innerText = idx + 1;
+                btn.onclick = () => jumpToQuestion(idx);
+                btn.className = getGridBtnClass(idx);
+                grid.appendChild(btn);
+            });
+
+            updateAnsweredCount();
+        }
+
+        function getGridBtnClass(idx) {
+            let base = "h-9 w-full rounded-lg font-semibold text-xs transition-all flex items-center justify-center border ";
+            
+            if (idx === currentIndex) {
+                return base + "bg-sky-600 text-white border-sky-600 shadow-sm ring-2 ring-sky-300";
+            }
+            if (bookmarked[idx]) {
+                return base + "bg-amber-100 text-amber-800 border-amber-300 font-bold";
+            }
+            if (userAnswers.hasOwnProperty(idx)) {
+                return base + "bg-emerald-500 text-white border-emerald-500";
+            }
+            return base + "bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200";
+        }
+
+        function updateGridBtn(idx) {
+            const btn = document.getElementById(`grid-btn-${idx}`);
+            if (btn) {
+                btn.className = getGridBtnClass(idx);
+            }
+        }
+
+        function updateAnsweredCount() {
+            const count = Object.keys(userAnswers).length;
+            document.getElementById('answered-count').innerText = `${count}/${activeQuestions.length}`;
+        }
+
+        // Load Question Data into Canvas
+        function loadQuestion(idx) {
+            currentIndex = idx;
+            const qData = activeQuestions[idx];
+
+            document.getElementById('current-q-num').innerText = idx + 1;
+            document.getElementById('question-text').innerHTML = `<span class="text-sky-600 font-extrabold mr-1">Câu ${idx + 1}:</span> ${qData.q}`;
+
+            // Update Progress Bar
+            const progPercent = ((idx + 1) / activeQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progPercent}%`;
+
+            // Update Bookmark Button
+            updateBookmarkBtnUI();
+
+            // Render Options
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const prefixes = ['A', 'B', 'C', 'D'];
+            const hasAnswered = userAnswers.hasOwnProperty(idx);
+            const userChoice = userAnswers[idx];
+
+            qData.options.forEach((optText, optIdx) => {
+                const optBtn = document.createElement('div');
+                
+                let btnStyle = "border-slate-200 hover:border-sky-300 bg-white hover:bg-slate-50 text-slate-700";
+                let badgeStyle = "bg-slate-100 text-slate-600 border-slate-200";
+
+                if (hasAnswered) {
+                    if (quizMode === 'instant') {
+                        if (optIdx === qData.answer) {
+                            btnStyle = "border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold";
+                            badgeStyle = "bg-emerald-500 text-white border-emerald-500";
+                        } else if (optIdx === userChoice) {
+                            btnStyle = "border-rose-500 bg-rose-50 text-rose-900 font-semibold";
+                            badgeStyle = "bg-rose-500 text-white border-rose-500";
+                        } else {
+                            btnStyle = "border-slate-200 bg-white opacity-60 text-slate-500";
+                        }
+                    } else { // End mode
+                        if (optIdx === userChoice) {
+                            btnStyle = "border-sky-500 bg-sky-50 text-sky-900 font-semibold";
+                            badgeStyle = "bg-sky-500 text-white border-sky-500";
+                        }
+                    }
+                }
+
+                optBtn.className = `p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start space-x-3.5 ${btnStyle}`;
+                optBtn.onclick = () => selectOption(optIdx);
+
+                optBtn.innerHTML = `
+                    <span class="w-7 h-7 rounded-lg border text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 transition-colors ${badgeStyle}">
+                        ${prefixes[optIdx]}
+                    </span>
+                    <span class="text-sm sm:text-base leading-snug">${optText}</span>
+                `;
+                container.appendChild(optBtn);
+            });
+
+            // Instant Feedback Handling
+            const feedbackBox = document.getElementById('instant-feedback');
+            if (quizMode === 'instant' && hasAnswered) {
+                feedbackBox.classList.remove('hidden');
+                const isCorrect = userChoice === qData.answer;
+                
+                if (isCorrect) {
+                    feedbackBox.className = "mt-6 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm";
+                    document.getElementById('feedback-title').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i><span>Chính xác!</span>`;
+                    document.getElementById('feedback-detail').innerText = "Thao tác ứng xử hoàn toàn chính xác theo định hướng bài học.";
+                } else {
+                    feedbackBox.className = "mt-6 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-800 text-sm";
+                    document.getElementById('feedback-title').innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 text-lg"></i><span>Chưa chính xác!</span>`;
+                    document.getElementById('feedback-detail').innerText = `Đáp án đúng là: ${prefixes[qData.answer]}. ${qData.options[qData.answer]}`;
+                }
+            } else {
+                feedbackBox.classList.add('hidden');
+            }
+
+            // Navigation Buttons Disabled status
+            document.getElementById('prev-btn').disabled = (idx === 0);
+            
+            const nextBtn = document.getElementById('next-btn');
+            if (idx === activeQuestions.length - 1) {
+                nextBtn.innerHTML = `<span>Nộp Bài</span> <i class="fa-solid fa-check text-sm"></i>`;
+                nextBtn.onclick = submitQuizConfirm;
+            } else {
+                nextBtn.innerHTML = `<span>Câu sau</span> <i class="fa-solid fa-chevron-right text-sm"></i>`;
+                nextBtn.onclick = nextQuestion;
+            }
+
+            // Refresh grid state for active highlight
+            renderQuestionGrid();
+        }
+
+        function selectOption(optIdx) {
+            userAnswers[currentIndex] = optIdx;
+            updateAnsweredCount();
+            loadQuestion(currentIndex);
+        }
+
+        function nextQuestion() {
+            if (currentIndex < activeQuestions.length - 1) {
+                loadQuestion(currentIndex + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                loadQuestion(currentIndex - 1);
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            loadQuestion(idx);
+        }
+
+        function toggleBookmark() {
+            bookmarked[currentIndex] = !bookmarked[currentIndex];
+            updateBookmarkBtnUI();
+            updateGridBtn(currentIndex);
+        }
+
+        function updateBookmarkBtnUI() {
+            const btn = document.getElementById('bookmark-btn');
+            const icon = document.getElementById('bookmark-icon');
+            const text = document.getElementById('bookmark-text');
+
+            if (bookmarked[currentIndex]) {
+                btn.className = "px-3 py-1.5 rounded-lg border border-amber-400 bg-amber-50 text-amber-700 font-semibold transition-colors flex items-center space-x-2 text-sm";
+                icon.className = "fa-solid fa-bookmark text-amber-600";
+                text.innerText = "Đã đánh dấu";
+            } else {
+                btn.className = "px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-300 transition-colors flex items-center space-x-2 text-sm";
+                icon.className = "fa-regular fa-bookmark";
+                text.innerText = "Đánh dấu";
+            }
+        }
+
+        // Custom Modal Logic
+        function showModal(title, msg, onConfirm) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = msg;
+            
+            const modal = document.getElementById('custom-modal');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+
+            modal.classList.remove('hidden');
+
+            confirmBtn.onclick = () => {
+                modal.classList.add('hidden');
+                onConfirm();
+            };
+            cancelBtn.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
+
+        function confirmExit() {
+            showModal("Thoát bài thi", "Bạn có chắc chắn muốn thoát? Tiến độ bài làm sẽ bị hủy.", () => {
+                clearInterval(timerInterval);
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('result-screen').classList.add('hidden');
+                document.getElementById('nav-quiz-info').classList.add('hidden');
+                document.getElementById('setup-screen').classList.remove('hidden');
+            });
+        }
+
+        function submitQuizConfirm() {
+            const unanswered = activeQuestions.length - Object.keys(userAnswers).length;
+            let msg = "Bạn có chắc chắn muốn nộp bài thi ngay bây giờ?";
+            if (unanswered > 0) {
+                msg = `Bạn còn ${unanswered} câu hỏi chưa trả lời. Bạn vẫn muốn nộp bài chứ?`;
+            }
+
+            showModal("Nộp Bài Thi", msg, () => {
+                finishQuiz();
+            });
+        }
+
+        // Finish Quiz and Calculate Score
+        function finishQuiz() {
+            clearInterval(timerInterval);
+
+            let correct = 0;
+            activeQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.answer) {
+                    correct++;
+                }
+            });
+
+            const total = activeQuestions.length;
+            const score = Math.round((correct / total) * 10 * 10) / 10;
+            const accuracy = Math.round((correct / total) * 100);
+
+            // Time Formatter
+            const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+            const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+            const timeStr = `${mins}:${secs}`;
+
+            // Populate Result UI
+            document.getElementById('final-score').innerText = score.toFixed(1);
+            document.getElementById('correct-count').innerText = `${correct}/${total}`;
+            document.getElementById('accuracy-percent').innerText = `${accuracy}%`;
+            document.getElementById('time-taken').innerText = timeStr;
+
+            // Rating Evaluation
+            const badgeIcon = document.getElementById('result-badge-icon');
+            const ratingText = document.getElementById('result-rating');
+            const subtext = document.getElementById('result-subtext');
+
+            if (score >= 9.0) {
+                ratingText.innerText = "Xuất Sắc! 🎉";
+                subtext.innerText = "Kiến thức của bạn cực kỳ vững chắc. Sẵn sàng cho kỳ thi chính thức!";
+                badgeIcon.className = "fa-solid fa-trophy text-4xl text-amber-500";
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else if (score >= 8.0) {
+                ratingText.innerText = "Giỏi! 🌟";
+                subtext.innerText = "Kết quả rất ấn tượng. Hãy rà soát lại một vài câu sai nhé!";
+                badgeIcon.className = "fa-solid fa-medal text-4xl text-sky-500";
+            } else if (score >= 6.5) {
+                ratingText.innerText = "Khá! 👍";
+                subtext.innerText = "Bạn đã nắm cơ bản lượng kiến thức. Cần ôn lại các tình huống khó hơn.";
+                badgeIcon.className = "fa-solid fa-award text-4xl text-indigo-500";
+            } else if (score >= 5.0) {
+                ratingText.innerText = "Trung Bình! 📚";
+                subtext.innerText = "Hãy dành thêm thời gian đọc lại đề cương để cải thiện điểm số.";
+                badgeIcon.className = "fa-solid fa-book-open text-4xl text-emerald-500";
+            } else {
+                ratingText.innerText = "Cần Cố Gắng! 💪";
+                subtext.innerText = "Đừng nản lòng, hãy xem lại chi tiết lời giải và luyện tập lại nhé!";
+                badgeIcon.className = "fa-solid fa-arrows-rotate text-4xl text-rose-500";
+            }
+
+            // Build Review Section
+            buildReviewList();
+
+            // Toggle Screens
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('nav-quiz-info').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Generate Detailed Answers List
+        function buildReviewList() {
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            const prefixes = ['A', 'B', 'C', 'D'];
+
+            activeQuestions.forEach((q, idx) => {
+                const userChoice = userAnswers[idx];
+                const isCorrect = userChoice === q.answer;
+                const isUnanswered = userChoice === undefined;
+
+                const item = document.createElement('div');
+                item.className = "p-5 rounded-xl border bg-white shadow-sm space-y-3";
+
+                let statusBadge = '';
+                if (isCorrect) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs"><i class="fa-solid fa-check mr-1"></i>Đúng</span>`;
+                } else if (isUnanswered) {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-xs"><i class="fa-solid fa-minus mr-1"></i>Bỏ trống</span>`;
+                } else {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 font-bold text-xs"><i class="fa-solid fa-xmark mr-1"></i>Sai</span>`;
+                }
+
+                item.innerHTML = `
+                    <div class="flex items-start justify-between gap-3">
+                        <h4 class="font-bold text-slate-800 text-base">
+                            <span class="text-sky-600">Câu ${idx + 1}:</span> ${q.q}
+                        </h4>
+                        <div class="shrink-0">${statusBadge}</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-sm">
+                        ${q.options.map((opt, oIdx) => {
+                            let optBg = "bg-slate-50 border-slate-200 text-slate-600";
+                            if (oIdx === q.answer) {
+                                optBg = "bg-emerald-50 border-emerald-400 text-emerald-900 font-semibold ring-1 ring-emerald-300";
+                            } else if (oIdx === userChoice && !isCorrect) {
+                                optBg = "bg-rose-50 border-rose-400 text-rose-900 font-semibold";
+                            }
+                            return `
+                                <div class="p-3 rounded-lg border flex items-start space-x-2 ${optBg}">
+                                    <span class="font-bold">${prefixes[oIdx]}.</span>
+                                    <span>${opt}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                reviewList.appendChild(item);
+            });
+        }
+
+        function scrollToReview() {
+            document.getElementById('review-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function restartQuiz() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
